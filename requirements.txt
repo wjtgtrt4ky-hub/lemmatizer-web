@@ -1,5 +1,4 @@
 flask
 gunicorn
-numpy<2
 spacy==3.7.4
-https://github.com/explosion/spacy-models/releases/download/de_core_news_sm-3.7.0/de_core_news_sm-3.7.0-py3-none-any.whl
+https://github.com/explosion/spacy-models/releases/download/de_core_news_sm-3.
