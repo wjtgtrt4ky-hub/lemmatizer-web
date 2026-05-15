@@ -22,11 +22,12 @@ def process(text):
     response = requests.post(
         "https://web-lemma.onrender.com/lemmatize",
         json={"text": text}
+        timeout=10
     )
 
     data = response.json()["result"]
 
-    return data
+    return data["result"]
 
 @app.route("/", methods=["GET", "POST"])
 def index():
