@@ -1,7 +1,7 @@
 import spacy
+import requests
 from flask import Flask, request, render_template_string, Response
 
-nlp = spacy.load("de_core_news_sm")
 last_output = ""
 
 app = Flask(__name__)
@@ -19,8 +19,14 @@ HTML = """
 """
 
 def process(text):
-    doc = nlp(text)
-    return [f"{t.text}\t{t.lemma_}\t{t.tag_}" for t in doc]
+    response = requests.post(
+        "https://web-lemma.onrender.com/lemmatize",
+        json={"text": text}
+    )
+
+    data = response.json()["result"]
+
+    return data
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -31,9 +37,7 @@ def index():
         text = request.form.get("text", "")
         action = request.form.get("action", "show")
 
-        doc = nlp(text)
-        output = [f"{t.text}\t{t.lemma_}\t{t.tag_}" for t in doc]
-
+        output = process(text)
         last_output = "\n".join(output)
 
         if action == "download":
