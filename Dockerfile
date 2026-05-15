@@ -11,7 +11,7 @@ COPY requirements.txt .
 
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
-RUN python -m spacy download de_core_news_sm
+RUN pip install https://github.com/explosion/spacy-models/releases/download/de_core_news_sm-3.7.0/de_core_news_sm-3.7.0-py3-none-any.whl
 
 COPY . .
 
