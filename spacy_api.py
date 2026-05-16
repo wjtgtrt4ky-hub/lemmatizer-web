@@ -1,34 +1,47 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, render_template_string
 import spacy
 
 app = Flask(__name__)
 
 nlp = spacy.load("de_core_news_sm")
 
+HTML = """
+<!doctype html>
+<html>
+<head>
+    <title>Lemmatizer</title>
+</head>
+<body>
+    <h1>spaCy Lemmatizer</h1>
 
-@app.route("/lemmatize", methods=["POST"])
-def lemmatize():
-    data = request.get_json(silent=True)
+    <form method="post">
+        <textarea name="text" rows="10" cols="60">{{ text }}</textarea><br>
+        <button type="submit">Analysieren</button>
+    </form>
 
-    if not data or "text" not in data:
-        return jsonify({"error": "no text provided"}), 400
+    {% if result %}
+    <h2>Ergebnis</h2>
+    <pre>{{ result }}</pre>
+    {% endif %}
+</body>
+</html>
+"""
 
-    text = data["text"]
+@app.route("/", methods=["GET", "POST"])
+def index():
+    text = ""
+    result = ""
 
-    doc = nlp(text)
+    if request.method == "POST":
+        text = request.form.get("text", "")
+        doc = nlp(text)
 
-    result = [
-        f"{token.text}\t{token.lemma_}\t{token.pos_}"
-        for token in doc
-    ]
+        result = "\n".join(
+            f"{token.text}\t{token.lemma_}\t{token.pos_}"
+            for token in doc
+        )
 
-    return jsonify({"result": result})
-
-
-@app.route("/", methods=["GET"])
-def health():
-    return jsonify({"status": "ok"})
-
+    return render_template_string(HTML, text=text, result=result)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    app.run(host="0.0.0.0", port=5000)
