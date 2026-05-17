@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template_string
+from flask import Flask, request, render_template_string, Response
 import spacy
 
 app = Flask(__name__)
@@ -12,11 +12,14 @@ HTML = """
     <title>Lemmatizer</title>
 </head>
 <body>
-    <h1>spaCy Lemmatizer</h1>
+    <h1>Web Lemmatizer</h1>
 
     <form method="post">
         <textarea name="text" rows="10" cols="60">{{ text }}</textarea><br>
-        <button type="submit">Analysieren</button>
+
+<button type="submit" name="action" value="show">Lemmatisieren</button>
+<button type="submit" name="action" value="download">Download</button>
+
     </form>
 
     {% if result %}
@@ -34,12 +37,23 @@ def index():
 
     if request.method == "POST":
         text = request.form.get("text", "")
+        action = request.form.get("action", "show")
+
         doc = nlp(text)
 
         result = "\n".join(
             f"{token.text}\t{token.lemma_}\t{token.pos_}"
             for token in doc
         )
+
+if action == "download":
+    return Response(
+        result,
+        mimetype="text/plain",
+        headers={
+            "Content-Disposition": "attachment; filename=lemmatized.txt"
+        }
+    )
 
     return render_template_string(HTML, text=text, result=result)
 
